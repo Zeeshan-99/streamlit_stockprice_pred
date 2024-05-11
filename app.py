@@ -16,7 +16,6 @@ def get_live_stock_price(ticker):
 # Streamlit app
 st.title('Live Stock Price and Trends App')
 
-# Ticker input
 ticker = st.text_input('Enter Stock Ticker (e.g., INFY):', 'INFY')
 
 # Display live stock price
@@ -35,7 +34,10 @@ fig.update_layout(title='Live Stock Price Trends',
                   template='plotly_dark')
 
 # Display the plot
-st.plotly_chart(fig)
+plot_placeholder = st.plotly_chart(fig)
+
+# Initialize DataFrame
+df = pd.DataFrame(columns=['Time', 'Values'])
 
 # Update live stock price and plot every 10 seconds
 while True:
@@ -50,5 +52,15 @@ while True:
     # Update the plot data
     fig.update_traces(x=timestamps, y=prices)
 
+    # Concatenate new data to the existing DataFrame
+    new_df = pd.DataFrame({'Time': [timestamp], 'Values': [current_price]})
+    df = pd.concat([df, new_df], ignore_index=True)
+
+    # Redraw the plot
+    plot_placeholder.plotly_chart(fig)
+
     # Wait for 10 seconds before the next update
-    time.sleep(2)
+    time.sleep(10)
+
+    # Clear previous display and show only the concatenated DataFrame
+    st.write('Historical Data:', df)
